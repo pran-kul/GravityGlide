@@ -1,116 +1,115 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float gravityValue = 1f;// The float value you want to manipulate
-    public float windValue = 0f;
-    public float windAngle;
-    float angleInRadians;
-    Vector2 windDirection;
-
-    //public float gravityIncrement = 0.01f; // How much the value changes per key press, currently not being used
-    //public float windIncrement = 0.01f;
-    //public float gravityMinValue = -1.0f; // The minimum value
-    //public float gravityMaxValue = 1.0f; // The maximum value
-    //public float windMinValue = 0f; // The minimum value
-    //public float windMaxValue = 1.0f; // The maximum value
-
-    public float windSpeed = 10.0f;
-
-    public List<Rigidbody2D> rigidBodyList = new List<Rigidbody2D>();
-    public Scrollbar gravityScroll,windScroll;
-
+    
     [SerializeField] private Rigidbody2D _frontTireRB;
     [SerializeField] private Rigidbody2D _CarRb;
     [SerializeField] private Rigidbody2D _backTireRB;
-    [SerializeField] private float _speed = 150f;
+    [SerializeField] private float speed = 150f;
+    [SerializeField] private float maxspeed = 4;
     [SerializeField] private float _rotationspeed = 300f;
     private float _moveInput;
+    bool vehicleIsMoving = true;
 
-  
+    Coroutine drawing;
+    public GameObject Line;
+    public bool CanDraw = false;
 
+    // Update is called once per frame
     void Update()
     {
-        // Check if the player is pressing the up arrow key
-        
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            //if (gravityValue - gravityIncrement > 0)
-            //{
-            //    gravityValue = 0;
-            //}
-            //// Decrease the value, but clamp it within the specified range
-            //gravityValue = Mathf.Clamp(gravityValue - gravityIncrement , gravityMinValue, gravityMaxValue);
-            //physicsChanging = true;
-            gravityValue = -1;
+        if (vehicleIsMoving) 
+        { 
+            _moveInput = 0.5f;
+            _frontTireRB.AddTorque(-_moveInput * speed * Time.fixedDeltaTime);
+            _backTireRB.AddTorque(-_moveInput * speed * Time.fixedDeltaTime);
+            //_CarRb.AddForce(_moveInput * _rotationspeed * Time.fixedDeltaTime);
+            _CarRb.velocity = Vector3.ClampMagnitude(_CarRb.velocity, maxspeed);
         }
 
-        // Check if the player is pressing the down arrow key
-        if (Input.GetKey(KeyCode.DownArrow))
+        if (CanDraw)
         {
-            // Increase the value, but clamp it within the specified range
-            //if(gravityValue + gravityIncrement >0 )
-            //{
-            //    gravityValue = 1;
-            //}
-            //else
-            //{
-            //    gravityValue = Mathf.Clamp(gravityValue + gravityIncrement, gravityMinValue, gravityMaxValue);
-            //}
-            gravityValue = 1;
-
-
+            if (Input.GetMouseButtonDown(0))
+            {
+                StartLine();
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                FinishLine();
+            }
         }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            // Decrease the value, but clamp it within the specified range
-            //windValue = Mathf.Clamp(windValue + windIncrement, windMinValue, windMaxValue);
-            windValue = 1;
-
-        }
-
-        // Check if the player is pressing the down arrow key
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            // Increase the value, but clamp it within the specified range
-            //windValue = Mathf.Clamp(windValue - windIncrement, windMinValue, windMaxValue);
-            windValue = 0;
-
-
-        }
-
-        
-        UdateWorldPhysics();
-
-        _moveInput = Input.GetAxisRaw("Horizontal");
-        _frontTireRB.AddTorque(-_moveInput * _speed * Time.fixedDeltaTime);
-        _backTireRB.AddTorque(-_moveInput * _speed * Time.fixedDeltaTime);
-        //_CarRb.AddForce(_moveInput * _rotationspeed * Time.fixedDeltaTime);
-
 
     }
 
- 
-   
-    public void UdateWorldPhysics()
+    public void ChangeMaxSpeedTo(float newSpeed,float newMaxSpeed, int time)
     {
-        gravityScroll.value = 1- ((gravityValue + 1) / 2);
-        windScroll.value = windValue;
-
-        foreach ( Rigidbody2D body in rigidBodyList)
-        {
-            body.gravityScale = gravityValue;
-
-            
-
-        }
-        angleInRadians = windAngle * Mathf.Deg2Rad; // Convert degrees to radians
-        windDirection = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
-        // Apply the wind force in the calculated direction.
-        _CarRb.AddForce(windDirection * windSpeed * windValue, ForceMode2D.Force);
-        _CarRb.velocity = Vector3.ClampMagnitude(_CarRb.velocity, 10);
+        StartCoroutine(ChangeMaxSpeed(newSpeed, newMaxSpeed, time));
     }
+
+    public IEnumerator ChangeMaxSpeed(float newSpeed, float newMaxSpeed, int time)
+    {
+        speed = newSpeed;
+        maxspeed = newMaxSpeed;
+
+        yield return new WaitForSeconds(time);
+
+        maxspeed = 4;
+        speed = 150;
+    }
+
+
+
+    void StartLine()
+    {
+        if (drawing != null)
+        {
+            StopCoroutine(drawing);
+        }
+        drawing = StartCoroutine(DrawLine());
+    }
+
+    void FinishLine()
+    {
+        StopCoroutine(drawing);
+
+        // Get points from the LineRenderer
+        Vector2[] points = new Vector2[lineRendererAdded.positionCount];
+        for (int i = 0; i < lineRendererAdded.positionCount; i++)
+        {
+            points[i] = lineRendererAdded.GetPosition(i);
+        }
+
+        // Add a PolygonCollider2D component
+        PolygonCollider2D collider = lineObject.AddComponent<PolygonCollider2D>();
+
+        // Set the points for the PolygonCollider2D
+        collider.points = points;
+        CanDraw = false;
+    }
+    GameObject lineObject;
+    LineRenderer lineRendererAdded;
+    IEnumerator DrawLine()
+    {
+        lineObject = Instantiate(Line as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
+        lineRendererAdded = lineObject.GetComponent<LineRenderer>();
+        lineRendererAdded.positionCount = 0;
+
+        while (true)
+        {
+            Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            position.z = 0;
+            lineRendererAdded.positionCount++;
+            lineRendererAdded.SetPosition(lineRendererAdded.positionCount - 1, position);
+            yield return null;
+        }
+    }
+
+
+
+
+
+
 }
