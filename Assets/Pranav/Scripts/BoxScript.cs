@@ -26,6 +26,14 @@ public class BoxScript : MonoBehaviour
                 }
                 //some code 
                 break;
+            case "jump":
+                if (collision.gameObject.GetComponent<PlayerController>())
+                {
+                    //upward force
+                    collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 20000);
+                    Destroy(gameObject);
+                }
+                break;
             default:
                 //some code 
                 break;
