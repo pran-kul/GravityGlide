@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
             _backTireRB.AddTorque(-_moveInput * speed * Time.fixedDeltaTime);
             //_CarRb.AddForce(_moveInput * _rotationspeed * Time.fixedDeltaTime);
             _CarRb.velocity = Vector3.ClampMagnitude(_CarRb.velocity, maxspeed);
+            Camera.main.transform.position = new Vector3( transform.position.x + 20, Camera.main.transform.position.y, Camera.main.transform.position.z);
         }
 
         if (CanDraw)

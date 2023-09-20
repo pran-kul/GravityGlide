@@ -5,6 +5,9 @@ using UnityEngine;
 public class BoxScript : MonoBehaviour
 {
     public string BoxType = "simple";
+    float ForceAngle = 60;
+    float angleInRadians;
+    Vector2 ForceDirection;
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -21,7 +24,7 @@ public class BoxScript : MonoBehaviour
             case "speed":
                 if (collision.gameObject.GetComponent<PlayerController>())
                 {
-                    collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeedTo(300,20,4);
+                    collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeedTo(350,20,4);
                     Destroy(gameObject);
                 }
                 //some code 
@@ -30,7 +33,10 @@ public class BoxScript : MonoBehaviour
                 if (collision.gameObject.GetComponent<PlayerController>())
                 {
                     //upward force
-                    collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 20000);
+                    collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 6000);
+                    collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.right * 6000);
+
+                   
                     Destroy(gameObject);
                 }
                 break;
