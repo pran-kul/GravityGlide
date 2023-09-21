@@ -37,6 +37,10 @@ public class BoxScript : MonoBehaviour
         BoxType = boxType;
         switch (BoxType)
         {
+            case "simple":
+                transform.GetComponent<Rigidbody2D>().mass= 20;
+
+                break;
             case "line":
                 transform.GetComponent<SpriteRenderer>().color = new Color32(89, 89, 89, 255);
 
@@ -64,7 +68,7 @@ public class BoxScript : MonoBehaviour
                 case "line":
                     if (collision.gameObject.GetComponent<PlayerController>())
                     {
-                        collision.gameObject.GetComponent<PlayerController>().CanDraw = true;
+                        collision.gameObject.GetComponent<PlayerController>().canDraw = true;
                         Destroy(gameObject);
                     }
 
@@ -72,7 +76,8 @@ public class BoxScript : MonoBehaviour
                 case "speed":
                     if (collision.gameObject.GetComponent<PlayerController>())
                     {
-                        collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeedFor(250, 10, 3);
+                        collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeedFor(1400, 3000, 4);
+                        collision.gameObject.GetComponent<Rigidbody2D>().AddForce(collision.gameObject.transform.right * 5000);
                         Destroy(gameObject);
                     }
                     //some code 
@@ -80,10 +85,13 @@ public class BoxScript : MonoBehaviour
                 case "jump":
                     if (collision.gameObject.GetComponent<PlayerController>())
                     {
-                        collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeed(150, 4);
+                        //collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeed(150, 4);
                         //upward force
-                        collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 8000);
-                        collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.right * 8000);
+                        collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 100f, ForceMode2D.Impulse);
+
+                        //collision.gameObject.GetComponent<Rigidbody2D>().AddForce(collision.gameObject.transform.right * 10000);
+                        //collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 30000);
+                        
 
 
                         Destroy(gameObject);

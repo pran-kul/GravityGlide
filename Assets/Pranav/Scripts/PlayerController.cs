@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,30 +10,53 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody2D _frontTireRB;
     [SerializeField] private Rigidbody2D _CarRb;
     [SerializeField] private Rigidbody2D _backTireRB;
-    [SerializeField] private float speed = 150f;
-    [SerializeField] private float maxspeed = 4;
-    [SerializeField] private float _rotationspeed = 300f;
+    [SerializeField] private float speed ;
+    [SerializeField] private float torque;
+    private float CurrentTorque,currentSpeed;
+
+    [SerializeField] private WheelJoint2D backWheel, frontWheel;
+    private JointMotor2D backMotor, frontMotor;
+
     private float _moveInput;
     bool vehicleIsMoving = true;
 
     Coroutine drawing;
     public GameObject Line;
-    public bool CanDraw = false;
+    public bool canDraw = false;
 
+
+    public float stuckDuration = 5f; 
+    private float timeSinceLastMovement = 0f;
+    private Vector3 lastPosition;
+
+
+    private void Start()
+    {
+        CurrentTorque = torque;
+        currentSpeed = speed;
+    }
     // Update is called once per frame
     void Update()
     {
         if (vehicleIsMoving) 
-        { 
-            _moveInput = 0.5f;
-            _frontTireRB.AddTorque(-_moveInput * speed * Time.fixedDeltaTime);
-            _backTireRB.AddTorque(-_moveInput * speed * Time.fixedDeltaTime);
-            //_CarRb.AddForce(_moveInput * _rotationspeed * Time.fixedDeltaTime);
-            _CarRb.velocity = Vector3.ClampMagnitude(_CarRb.velocity, maxspeed);
-            Camera.main.transform.position = new Vector3( transform.position.x + 8, transform.position.y +2, Camera.main.transform.position.z);
+        {
+            //_frontTireRB.AddTorque( -speed * Time.fixedDeltaTime);
+            //_backTireRB.AddTorque(-speed * Time.fixedDeltaTime);
+
+            frontMotor.motorSpeed = -currentSpeed;
+            backMotor.motorSpeed = -currentSpeed;
+
+            frontMotor.maxMotorTorque = CurrentTorque;
+            backMotor.maxMotorTorque = CurrentTorque;
+
+            frontWheel.motor = frontMotor;
+            backWheel.motor = backMotor;
+
+           // _CarRb.velocity = Vector3.ClampMagnitude(_CarRb.velocity, maxspeed);
+            Camera.main.transform.position = new Vector3( transform.position.x + 10, transform.position.y +2, Camera.main.transform.position.z);
         }
 
-        if (CanDraw)
+        if (canDraw)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -43,6 +68,29 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+
+        if (Vector3.Distance(transform.position, lastPosition) < 0.01f)
+        {
+            timeSinceLastMovement += Time.deltaTime;
+
+            if (timeSinceLastMovement >= stuckDuration)
+            {
+                // Car is stuck, end the game
+                EndGame();
+            }
+        }
+        else
+        {
+            timeSinceLastMovement = 0f;
+            lastPosition = transform.position;
+        }
+
+    }
+
+    private void EndGame()
+    {
+        Debug.Log("Game Over");
+        SceneManager.LoadScene(0);
     }
 
     public void ChangeMaxSpeedFor(float newSpeed,float newMaxSpeed, int time)
@@ -50,22 +98,21 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(ChangeMaxSpeed(newSpeed, newMaxSpeed, time));
     }
 
-    public IEnumerator ChangeMaxSpeed(float newSpeed, float newMaxSpeed, int time)
+    public IEnumerator ChangeMaxSpeed(float newSpeed, float newMaxTorque, int time)
     {
-        speed = newSpeed;
-        maxspeed = newMaxSpeed;
+        currentSpeed= newSpeed;
+        CurrentTorque = newMaxTorque;
 
         yield return new WaitForSeconds(time);
 
-        maxspeed = 4;
-        speed = 150;
+        CurrentTorque = torque;
+        currentSpeed = speed;
     }
 
     public void ChangeMaxSpeed(float newSpeed, float newMaxSpeed)
     {
         speed = newSpeed;
-        maxspeed = newMaxSpeed;
-
+       
     }
 
     void StartLine()
@@ -92,7 +139,7 @@ public class PlayerController : MonoBehaviour
         }
         // Set the points for the PolygonCollider2D
         collider.points = points;
-        CanDraw = false;
+        canDraw = false;
 
 
     }
