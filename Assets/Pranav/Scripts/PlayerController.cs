@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
             _backTireRB.AddTorque(-_moveInput * speed * Time.fixedDeltaTime);
             //_CarRb.AddForce(_moveInput * _rotationspeed * Time.fixedDeltaTime);
             _CarRb.velocity = Vector3.ClampMagnitude(_CarRb.velocity, maxspeed);
-            Camera.main.transform.position = new Vector3( transform.position.x + 20, Camera.main.transform.position.y, Camera.main.transform.position.z);
+            Camera.main.transform.position = new Vector3( transform.position.x + 8, transform.position.y +2, Camera.main.transform.position.z);
         }
 
         if (CanDraw)
@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void ChangeMaxSpeedTo(float newSpeed,float newMaxSpeed, int time)
+    public void ChangeMaxSpeedFor(float newSpeed,float newMaxSpeed, int time)
     {
         StartCoroutine(ChangeMaxSpeed(newSpeed, newMaxSpeed, time));
     }
@@ -61,7 +61,12 @@ public class PlayerController : MonoBehaviour
         speed = 150;
     }
 
+    public void ChangeMaxSpeed(float newSpeed, float newMaxSpeed)
+    {
+        speed = newSpeed;
+        maxspeed = newMaxSpeed;
 
+    }
 
     void StartLine()
     {
@@ -75,20 +80,21 @@ public class PlayerController : MonoBehaviour
     void FinishLine()
     {
         StopCoroutine(drawing);
+        // Add a PolygonCollider2D component
+        PolygonCollider2D collider = lineObject.AddComponent<PolygonCollider2D>();
 
+        
         // Get points from the LineRenderer
         Vector2[] points = new Vector2[lineRendererAdded.positionCount];
         for (int i = 0; i < lineRendererAdded.positionCount; i++)
         {
             points[i] = lineRendererAdded.GetPosition(i);
         }
-
-        // Add a PolygonCollider2D component
-        PolygonCollider2D collider = lineObject.AddComponent<PolygonCollider2D>();
-
         // Set the points for the PolygonCollider2D
         collider.points = points;
         CanDraw = false;
+
+
     }
     GameObject lineObject;
     LineRenderer lineRendererAdded;
@@ -104,6 +110,11 @@ public class PlayerController : MonoBehaviour
             position.z = 0;
             lineRendererAdded.positionCount++;
             lineRendererAdded.SetPosition(lineRendererAdded.positionCount - 1, position);
+
+           
+
+          
+            
             yield return null;
         }
     }

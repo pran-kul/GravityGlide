@@ -5,64 +5,120 @@ using UnityEngine;
 public class BoxScript : MonoBehaviour
 {
     public string BoxType = "simple";
-    float ForceAngle = 60;
-    float angleInRadians;
-    Vector2 ForceDirection;
-
-    private void OnCollisionEnter2D(Collision2D collision)
+    bool isMovable = false;
+    Vector3 newPosition;
+    bool initialDrop = false;
+    private void Start()
     {
+        offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        OnMouseDown();
+    }
+    private void Update()
+    {
+        if(Input.GetMouseButtonUp(0) && !initialDrop)
+        {
+            isMovable = false;
+            initialDrop = true;
+        }
+        if(isMovable)
+        {
+            
+            newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) + offset;
+
+            // Keep the object's Z position unchanged
+            newPosition.z = gameObject.transform.position.z;
+
+            // Update the object's position
+            gameObject.transform.position = newPosition;
+        }
+    }
+    public void InitializeBox(string boxType)
+    {
+        BoxType = boxType;
         switch (BoxType)
         {
             case "line":
-                if (collision.gameObject.GetComponent<PlayerController>())
-                {
-                    collision.gameObject.GetComponent<PlayerController>().CanDraw = true;
-                    Destroy(gameObject);
-                }
-                
+                transform.GetComponent<SpriteRenderer>().color = new Color32(89, 89, 89, 255);
+
                 break;
             case "speed":
-                if (collision.gameObject.GetComponent<PlayerController>())
-                {
-                    collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeedTo(350,20,4);
-                    Destroy(gameObject);
-                }
+                transform.GetComponent<SpriteRenderer>().color = new Color32(130, 22, 0, 255);
+                
                 //some code 
                 break;
             case "jump":
-                if (collision.gameObject.GetComponent<PlayerController>())
-                {
-                    //upward force
-                    collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 6000);
-                    collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.right * 6000);
-
-                   
-                    Destroy(gameObject);
-                }
+                transform.GetComponent<SpriteRenderer>().color = new Color32(96, 6, 192, 255);
                 break;
             default:
                 //some code 
                 break;
         }
+        
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if( !isMovable)
+        {
+            switch (BoxType)
+            {
+                case "line":
+                    if (collision.gameObject.GetComponent<PlayerController>())
+                    {
+                        collision.gameObject.GetComponent<PlayerController>().CanDraw = true;
+                        Destroy(gameObject);
+                    }
+
+                    break;
+                case "speed":
+                    if (collision.gameObject.GetComponent<PlayerController>())
+                    {
+                        collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeedFor(250, 10, 3);
+                        Destroy(gameObject);
+                    }
+                    //some code 
+                    break;
+                case "jump":
+                    if (collision.gameObject.GetComponent<PlayerController>())
+                    {
+                        collision.gameObject.GetComponent<PlayerController>().ChangeMaxSpeed(150, 4);
+                        //upward force
+                        collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 8000);
+                        collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.right * 8000);
+
+
+                        Destroy(gameObject);
+                    }
+                    break;
+                default:
+                    //some code 
+                    break;
+            }
+        }
+        
     }
 
     private Vector3 offset;
 
     void OnMouseDown()
     {
+        
         // Calculate the offset between the object's position and the mouse position
         offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        isMovable = true;
     }
 
     void OnMouseDrag()
     {
-        // Calculate the new position based on the mouse position and offset
-        Vector3 newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) + offset;
-
-        // Keep the object's Z position unchanged
-        newPosition.z = gameObject.transform.position.z;
-
-        // Update the object's position
-        gameObject.transform.position = newPosition;
+       
     }
+    private void OnMouseUp()
+    {
+        isMovable = false;
+    }
+    private void OnMouseUpAsButton()
+    {
+        isMovable = false;
+    }
+
+
 }
