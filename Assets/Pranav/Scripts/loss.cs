@@ -10,7 +10,7 @@ public class loss : MonoBehaviour
        if (collision.gameObject.tag == "Player"|| Input.GetKeyDown(KeyCode.R) )
         {
          
-    SceneManager.LoadScene( SceneManager.GetActiveScene().buildIndex ) ;
+            SceneManager.LoadScene( SceneManager.GetActiveScene().buildIndex ) ;
         
         }
     }
@@ -26,7 +26,7 @@ public class loss : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R) )
         {
          
-    SceneManager.LoadScene( SceneManager.GetActiveScene().buildIndex ) ;
+            SceneManager.LoadScene( SceneManager.GetActiveScene().buildIndex ) ;
         
         }
     }

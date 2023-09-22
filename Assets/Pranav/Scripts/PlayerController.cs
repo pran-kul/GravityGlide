@@ -139,6 +139,8 @@ public class PlayerController : MonoBehaviour
         }
         // Set the points for the PolygonCollider2D
         collider.points = points;
+
+        lineRendererAdded.material.color = new Color32(38, 16, 0, 255);
         canDraw = false;
 
 

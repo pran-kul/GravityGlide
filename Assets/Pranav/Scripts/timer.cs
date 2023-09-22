@@ -13,15 +13,15 @@ public class timer : MonoBehaviour
     {
         textMeshProUI = GetComponent<TextMeshProUGUI>();
 
-        count=0;
+        count=endtime;
     }
 
     // Update is called once per frame
     void Update()
     {
-        count+=Time.deltaTime;
-        textMeshProUI.text = string.Format("{0:N2}", count);
-        if (count>=endtime){
+        count-=Time.deltaTime;
+        textMeshProUI.text =  ((int)count).ToString();
+        if (count== 0){
 
             SceneManager.LoadScene( SceneManager.GetActiveScene().buildIndex ) ;
         }
