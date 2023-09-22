@@ -140,7 +140,16 @@ public class PlayerController : MonoBehaviour
         // Set the points for the PolygonCollider2D
         collider.points = points;
 
-        lineRendererAdded.material.color = new Color32(38, 16, 0, 255);
+        
+        Material material = lineRendererAdded.material;
+
+        // Ensure the material is set to a "Sprites/Default" shader
+        // This is a common shader used for LineRenderer materials
+        material.shader = Shader.Find("Sprites/Default");
+
+        // Set the new color
+        material.color = new Color32(38, 16, 0, 255);
+
         canDraw = false;
 
 
